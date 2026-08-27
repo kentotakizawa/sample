@@ -1,0 +1,105 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SDGsのトピックについての理解を調査する実験ページ</title>
+    <link href="./static/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="./static/htmx.min.js"></script>
+  </head>
+  <body>
+    <!-- 変数であるトピック名が入る -->
+    <div class="container mt-5 mb-5">
+      <h2>{{ topic_name }}</h2>
+      <p class="lead">
+        上記のSDGsのターゲットについて、あなたの考えを制限時間（{{ time_limit
+        }}分）の許す限り記入をしてください。
+      </p>
+      <p>
+        制限時間が過ぎると本文の入力はできなくなり、URL報告欄のみ入力可能な状態になります。報告するべきURLの記入が終わったら、送信ボタンを押して、遷移先にある完了コードをクラウドワークスに報告してください。記入にあたって以下の条件を守ってください。
+      </p>
+      <ul>
+        <li>
+          不正防止およびご自身の言葉で記述いただくため、文章入力欄への貼り付け（コピペ）は不可となっております。お手数ですが、手入力でお願いします。
+        </li>
+        <li>
+          わからないことはWeb検索をして情報を得ても構いません。情報を得たWebページは下部のURL報告欄にて1URLにつき1行で報告してください。URL報告欄は貼り付け可能です。
+        </li>
+        <li>
+          見出しをつけたり箇条書きにしたりせず、文章で考えを述べる形で記述してください。改行は適宜していただいても構いません。
+        </li>
+        <li>
+          記述内容を単独で読んでも理解できるように代名詞を使うことはなるべく避けてください。例えば「本テーマについては〜」のような記述はテーマを知らない人には読めない文章になりますので、テーマ名を明確に記述するなどの工夫をお願いします。
+        </li>
+      </ul>
+      <!-- 本文の記入エリア -->
+      <!-- htmxを使って，20秒ごとに自動送信，20分後に送信終了 -->
+      <form
+        id="main-form"
+        action="./submit"
+        method="post"
+        hx-post="./auto_submit"
+        hx-trigger="every {{ time_interval }}s"
+        hx-swap="none"
+      >
+        <!-- #contentはhtmxを使ってペースト禁止 -->
+        <div class="form-floating">
+          <textarea
+            id="content"
+            class="form-control"
+            name="content"
+            rows="10"
+            placeholder="ここにあなたの考えを記入してください"
+            hx-on:paste="event.preventDefault()"
+            style="height: 200px"
+          ></textarea>
+          <label for="content">あなたの考え:</label>
+        </div>
+        <br />
+        <div class="form-floating">
+          <textarea
+            id="url"
+            class="form-control"
+            name="url"
+            rows="5"
+            placeholder="ここに報告するURLを記入してください"
+            style="height: 100px"
+          ></textarea>
+          <label for="url">報告するURL:</label>
+        </div>
+        <br />
+        <!-- ボタンを押したら /submit にPOSTしてページ遷移 -->
+        <input
+          type="submit"
+          class="btn btn-primary w-100"
+          id="submit-btn"
+          value="送信"
+          disabled
+        />
+      </form>
+    </div>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+          // Jinja2テンプレートからミリ秒を取得 (例: {{ time_limit * 60 * 1000 }})
+          const timeLimitMs = {{ time_limit * 60 * 1000 }};
+
+          setTimeout(() => {
+            alert('制限時間が経過しましたので、本文の入力はできなくなりました。URL報告欄のみ入力可能です。入力し終えたら送信ボタンを押してください。');
+            // タグの有効無効の切り替え
+            const textarea = document.getElementById('content');
+            const button = document.getElementById('submit-btn');
+
+            if (textarea) {
+              // テキストエリアを読み取り専用にする
+              textarea.readOnly = true;
+              textarea.style.backgroundColor = '#e9ecef';
+            };
+            // ボタンを有効化する
+            if (button) button.disabled = false;
+
+            console.log('指定時間が経過したため、要素の状態を変更しました');
+          }, timeLimitMs);
+        });
+    </script>
+    <script src="./static/js/bootstrap.min.js"></script>
+  </body>
+</html>
